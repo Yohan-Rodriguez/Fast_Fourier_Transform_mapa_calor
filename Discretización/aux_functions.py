@@ -1,3 +1,5 @@
+import base64
+
 from bs4 import BeautifulSoup
 import requests
 
@@ -64,4 +66,30 @@ def parse_bs4(url_tx):
 
     return soup
 # END ---------  SEARCH MATCHE'S URL                                                                                   #
+# ==================================================================================================================== #
+
+
+# ==================================================================================================================== #
+# EXTRACT DATA                                                                                                         #
+# ==================================================================================================================== #
+def extract_img(driver, i_jornada=None, home=None, away=None):
+
+    # Imagen del mapa de calor
+    xpath_img_heat_map = '//*[@id="Opta_0-heatmap-canvas"]'
+    canvas_element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, xpath_img_heat_map)))
+
+    # Parsear el canvas de la imagen como un string base64 para obtener su representación en texto
+    image_data_base64 = driver.execute_script("""
+        var canvas = arguments[0];
+        var imageData = canvas.toDataURL('image/png');
+        return imageData;""", 
+        canvas_element)
+
+    # Decode the base64 string into image bytes
+    image_bytes = base64.b64decode(image_data_base64.split(',')[1])
+
+    # Guardar imagen
+    with open('Img/jornada_{}_{}_{}.png'.format(i_jornada, home, away), "wb") as image_file:
+        image_file.write(image_bytes)
+# END ---------  EXTRACT DATA                                                                                          #
 # ==================================================================================================================== #
