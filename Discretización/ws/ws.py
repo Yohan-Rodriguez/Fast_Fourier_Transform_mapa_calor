@@ -54,6 +54,20 @@ def get_data():
         >>> get_data()
     """
 
+    '''
+    Seleccionar jornada
+    '''
+    while True:
+        try:
+            num_jornada = int(input('\nIngrese la jornada (entre 1 y la 19) desde la que quiere acceder:\n\t>_ '))
+            if (num_jornada>=1) and (num_jornada<=19):
+                break
+            else:
+                print('ERROR!: Seleccione una jornada entre 1 y la 19...')
+        except:
+            print('ERROR!: Valor ingresado no es un número. Intente de nuevo...')
+    
+    print('\nInciando scraping desde la jornada: {}'.format(num_jornada))
     # ================================================================================================================ #
     # CONN DRIVER                                                                                                      #
     # ================================================================================================================ #   
@@ -67,10 +81,10 @@ def get_data():
 
     
     # ================================================================================================================ #
-    # CONN DRIVER                                                                                                      #
+    # LEAGUE's JOURNEY                                                                                                 #
     # ================================================================================================================ #   
     # Iterar sobre cada una de las 19 jornadas
-    for i_jornada in range(1, 20):
+    for i_jornada in range(num_jornada, 20):
 
         # Diccionario con la data de cada partido en particular
         dict_jornada = {'JOR': [], 'HOME': [], 'AWAY': [], 'G_H': [], 'G_A': [], 'stats_names': [],
@@ -84,13 +98,10 @@ def get_data():
         soup_rx = aux_func.parse_bs4(url_tx=url_jor)
 
         '''
-        Obtener las 10 url's de los partidos de la jornada:
-        
+        Obtener las 10 url's de los partidos de la jornada:        
         ej:
         urls_matches = ['https://colombia.as.com/futbol/jaguares-abre-la-liga-con-victoria-ante-patriotas-n/',
                         'https://colombia.as.com/futbol/partidazo-y-golazos-en-el-empate-entre-pereira-y-cali-n/',
-                        ...
-                        ...
                         ...
                         'https://colombia.as.com/futbol/equidad-y-envigado-sin-efectividad-en-techo-n/',
                         'https://colombia.as.com/futbol/santa-fe-gana-en-su-debut-triunfo-ante-pasto-con-gol-de-rodallega-n/']
@@ -131,7 +142,6 @@ def get_data():
             
             # Goles en el partido
             goals_teams = [ int(i_goal.get_text()) for i_goal in soup_stats.find_all('span', {'class': 'team-score'}) ]
-            # Ej: ["Jorge Cardona 21' (pp)", "Jorge Cardona 58'"]
             
             # Estadísticas:
             # Labels de las estadísticas
@@ -160,40 +170,29 @@ def get_data():
             # Scroll hacia la sección del mapa de calor
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")
 
-            # Xpath de la selección para el mapa de calor del visitante
+            # Xpath de la selección para el mapa de calor del VISITANTE
             xpath_button_a = '//*[@id="Opta_0"]/div/div/table[2]/tbody/tr/td[2]/div/div/button'
-            xpath_radio_button_a = '//*[@id="Opta_0"]/div/div/table[2]/tbody/tr/td[2]/div/div/div/dl/dt[1]'
-            
-            # De-seleccionar mapa de calor del visitante
-            aux_func.search_and_click_on_button(driver, xpath_tx=xpath_button_a)
-            aux_func.search_and_click_on_button(driver, xpath_tx=xpath_radio_button_a)
-            aux_func.search_and_click_on_button(driver, xpath_tx=xpath_button_a)
-
-            # Descargar mapa de calor del local
+            xpath_radio_button_a = '//*[@id="Opta_0"]/div/div/table[2]/tbody/tr/td[2]/div/div/div/dl/dt[1]'         
+            # De-seleccionar mapa de calor del VISITANTE
+            aux_func.select_teams_heat_map(driver=driver, xpath_button_rx=xpath_button_a, xpath_radio_button_rx=xpath_radio_button_a)
+            # Descargar mapa de calor del LOCAL
             aux_func.extract_img(driver=driver, i_jornada=i_jornada, home=names_teams[0], away=names_teams[1], home_or_away='H')
 
-            # Xpath de la selección para el mapa de calor del local
+            # Xpath de la selección para el mapa de calor del LOCAL
             xpath_button_h = '//*[@id="Opta_0"]/div/div/table[2]/tbody/tr/td[1]/div/div/button'
             xpath_radio_button_h = '//*[@id="Opta_0"]/div/div/table[2]/tbody/tr/td[1]/div/div/div/dl/dt[1]'
-            
-            # De-seleccionar mapa de calor del local
-            aux_func.search_and_click_on_button(driver, xpath_tx=xpath_button_h)
-            aux_func.search_and_click_on_button(driver, xpath_tx=xpath_radio_button_h)
-            aux_func.search_and_click_on_button(driver, xpath_tx=xpath_button_h)
-
-            # Seleccionar mapa de calor del visitante    
-            aux_func.search_and_click_on_button(driver, xpath_tx=xpath_button_a)
-            aux_func.search_and_click_on_button(driver, xpath_tx=xpath_radio_button_a)
-            aux_func.search_and_click_on_button(driver, xpath_tx=xpath_button_a)
-
-            # Descargar mapa de calor del visitante
+            # De-seleccionar mapa de calor del LOCAL
+            aux_func.select_teams_heat_map(driver=driver, xpath_button_rx=xpath_button_h, xpath_radio_button_rx=xpath_radio_button_h)
+            # Seleccionar mapa de calor del VISITANTE    
+            aux_func.select_teams_heat_map(driver=driver, xpath_button_rx=xpath_button_a, xpath_radio_button_rx=xpath_radio_button_a)
+            # Descargar mapa de calor del VISITANTE
             aux_func.extract_img(driver=driver, i_jornada=i_jornada, home=names_teams[0], away=names_teams[1], home_or_away='A')
 
-            # Cierra la nueva ventana y regresa a la inicial
+            # Cierra la actual/nueva ventana y regresa a la inicial
             time.sleep(np.random.randint(2, 6))
             driver.close()                      
 
-            # Foco sobre la ventan principal
+            # Foco sobre la ventana principal
             driver.switch_to.window(window_handles[0])
 
         # Crear Datasframe con los 10 partidos de la joranda actual
@@ -203,8 +202,7 @@ def get_data():
         df.to_csv('df_s/jornada_{}.csv'.format(i_jornada), encoding='latin',  index=False)
 
         time.sleep(np.random.randint(1, 3))
-
-    # END --------- CONN DRIVER                                                                                        #
+    # END --------- LEAGUE's JOURNEY                                                                                   #
     # ================================================================================================================ # 
 
     time.sleep(5)
@@ -216,4 +214,6 @@ def get_data():
 # END --------- MAIN                                                                                                   #
 # ==================================================================================================================== #
 
+
+# Llamar la función "MAIN"
 get_data()

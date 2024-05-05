@@ -20,9 +20,21 @@ def search_and_click_on_button(driver, xpath_tx, click_js=True):
         driver.execute_script("arguments[0].click();", element)    
     else:
         element.click()
-
-    time.sleep(1)
 # END ---------  SEARCH BUTTON                                                                                         #
+# ==================================================================================================================== #
+        
+
+# ==================================================================================================================== #
+# SELECT TEAM IN HEAT MAP                                                                                              #
+# ==================================================================================================================== #
+def select_teams_heat_map(driver, xpath_button_rx, xpath_radio_button_rx):
+    search_and_click_on_button(driver, xpath_tx=xpath_button_rx)
+    time.sleep(1)
+    search_and_click_on_button(driver, xpath_tx=xpath_radio_button_rx)
+    time.sleep(1)
+    search_and_click_on_button(driver, xpath_tx=xpath_button_rx)
+    time.sleep(1)
+# END ---------  SELECT TEAM IN HEAT MAP                                                                               #
 # ==================================================================================================================== #
 
 
@@ -65,15 +77,13 @@ def parse_bs4(url_tx):
     # Intsancia del BeautifulSoup
     soup = BeautifulSoup(response.text, 'html.parser')
 
-
-
     return soup
 # END ---------  SEARCH MATCHE'S URL                                                                                   #
 # ==================================================================================================================== #
 
 
 # ==================================================================================================================== #
-# EXTRACT DATA                                                                                                         #
+# EXTRACT DATA IMG                                                                                                     #
 # ==================================================================================================================== #
 def extract_img(driver, i_jornada=None, home=None, away=None, home_or_away=None):
 
@@ -96,5 +106,6 @@ def extract_img(driver, i_jornada=None, home=None, away=None, home_or_away=None)
     # Guardar imagen
     with open('Img/jornada_{}_{}_{}_{}.png'.format(i_jornada, home, away, home_or_away), "wb") as image_file:
         image_file.write(image_bytes)
-# END ---------  EXTRACT DATA                                                                                          #
+# END ---------  EXTRACT DATA IMG                                                                                      #
 # ==================================================================================================================== #
+        
