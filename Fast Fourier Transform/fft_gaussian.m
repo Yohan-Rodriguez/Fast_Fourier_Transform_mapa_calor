@@ -1,4 +1,4 @@
-% Obtener la ruta del directorio actual
+% Obtener la ruta del directorio actual donde se ejecuta este script
 directorio_actual = pwd;
 
 % Directorio donde se encuentran las imágenes
@@ -10,7 +10,7 @@ patron = 'jornada_\d+_.*_.*_[AH].png';
 % Obtener lista de nombres de archivo
 archivos = dir(fullfile(directorio_imagenes, '*.png'));
 
-for i_foto=1:1
+for i_foto=1:length(archivos)
     name_img = archivos(i_foto).name;
 
     % Cargar la imagen del mapa de calor del partido de fútbol
@@ -47,7 +47,7 @@ for i_foto=1:1
     % Normalizar el filtro gaussiano
     filtro_gaussiano_norm = filtro_gaussiano / sum(filtro_gaussiano(:));
     
-    % Aplicar el filtro gaussiano a la FFT == Convolución
+    % Aplicar el filtro gaussiano a la FFT == CONVOLUCIÓN
     fft_filtrada = fft_imagen .* filtro_gaussiano_norm;
     
     
@@ -93,16 +93,31 @@ for i_foto=1:1
     
     
     % -------------------------------------------------------------------------
-    % ARCHIVOS BINARIOS DEArchivo Binario de la transformada inversa de Fourier
+    % ARCHIVOS BINARIOS de la transformada inversa de Fourier IFFT
+    % Lista de umbrales 
+    %   0.1 para obtener tonos desde el azul al rojo
+    %   0.65 para obtener tonos cercanos al rojo
+    list_umbral = [0.1, 0.65];
 
-    % Umbral para distinguir blanco y negro
-    umbral = 0.5;
-    
-    % Convertir los valores de la imagen filtrada a blanco o negro según el umbral
-    imagen_binaria = imagen_normalizada > umbral;
-    
-    % Guardar la matriz en un archivo CSV
-    img_bin_csv = sprintf('bin_%s.csv', name_img[:-3]);
-    csvwrite(img_bin_csv , imagen_binaria);
+    for i_umbral=1:length(list_umbral)
+        % Umbral para distinguir blanco y negro    
+        umbral_down = list_umbral(i_umbral);
+        
+        % Convertir los valores de la imagen filtrada a blanco o negro según el umbral
+        imagen_binaria = imagen_normalizada >= umbral_down;
+        
+        % Redondear 'umbral_down' a dos decimales
+        umbral_down_dos_decimales = round(umbral_down, 2);
+        
+        % Eliminar el punto del valor de umbral para agregarlo al nombre
+        % del archivo
+        umbral_sin_punto = strrep(num2str(umbral_down_dos_decimales), '.', '');
+        
+        % Formatear el nombre del archivo sin el punto
+        name_bin = sprintf('_bin_%s', umbral_sin_punto);
 
+        % Guardar la matriz en un archivo CSV        
+        img_bin_csv = strcat(name_img(1:end-4), name_bin, '.csv');
+        writematrix(imagen_binaria, img_bin_csv); 
+    end
 end

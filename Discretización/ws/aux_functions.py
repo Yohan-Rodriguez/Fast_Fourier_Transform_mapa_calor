@@ -104,7 +104,7 @@ def extract_img(driver, i_jornada=None, home=None, away=None, home_or_away=None)
     image_bytes = base64.b64decode(image_data_base64.split(',')[1])
 
     # Guardar imagen
-    with open('Img/jornada_{}_{}_{}_{}.png'.format(i_jornada, home, away, home_or_away), "wb") as image_file:
+    with open('Img/{}_{}_{}_{}.png'.format(i_jornada, home, away, home_or_away), "wb") as image_file:
         image_file.write(image_bytes)
 # END ---------  EXTRACT DATA IMG                                                                                      #
 # ==================================================================================================================== #

@@ -199,7 +199,7 @@ def get_data():
         df = pd.DataFrame(dict_jornada)
 
         # Guardar DataFrame
-        df.to_csv('df_s/jornada_{}.csv'.format(i_jornada), encoding='latin',  index=False)
+        df.to_csv('df_s/{}.csv'.format(i_jornada), encoding='latin',  index=False)
 
         time.sleep(np.random.randint(1, 3))
     # END --------- LEAGUE's JOURNEY                                                                                   #
